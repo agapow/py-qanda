@@ -44,150 +44,41 @@ class Session (object):
 	# XXX: in future, this may include initialization of readline etc.
 	
 	## Questions:
-	def _ask (self, question, converters=[], help=None, hints=None, default=None,
-			strip_flanking_space=True):
+	def string (self, question, converters=[], help=None, hints=None, default=None,
+			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
 		
-		:Parameters:
-			question
-				The text of the question asked.
-			converters
-				An array of conversion and validation functions to be called in
-				sucession with the results of the previous. If any throws an error,
-				it will be caught and the question asked again.
-			help
-				Introductory text to be shown before the question.
-			hints
-				Short reminder text of possible answers.
-			default
-				The value the answer will be set to before processing if a blank
-				answer (i.e. just hitting return) is entered.
-			strip_flanking_space
-				If true, flanking space will be stripped from the answer before it is
-				processed.
-			
-		This is the most general function for getting information from the user. It
-		prints the help text (if any), prints the question and hints and then waits
-		for input form the user. All answers are fed from the converters. If
-		conversion fails, the question is re-asked.
-		
-		The following sequence is used in processing user answers:
-		
-		1. The raw input is read
-		2. If the options is set, flanking space is stripped
-		3. If the input is an empty string and a default answer is given, the input
-			is set to that value (i.e. the default answer must be a valid input value)
-		4. The input is feed through each converter in turn, with the the result of
-			one feeding into the next.
-		5. If the conversion raises an error, the question is asked again
-		6. Otherwise the processed answer is returned
-		
-		We do this because
+		The simplest public question function and the basis of many of the others,
+		this is a thin wrapper around the core `_ask` method that 
 		
 		"""
-		## Preconditions:
-		assert (question), "'ask' requires a question"
-		
-		## Main:
-		# show leadin
-		if help:
-			if isinstance (help, basestring):
-				help = [help]
-			for h in help:
-				print help
-		# build presentation
-		question_str = _clean_text ("%s%s: " % (question, _format_hints_text (hints, default)))
-		# ask question until you get a valid answer
-		while True:
-			print question_str,
-			raw_answer = raw_input()
-			if strip_flanking_space:
-				raw_answer = raw_answer.strip()
-			if default:
-				raw_answer = raw_answer or default
-			try:
-				for conv in converters:
-					raw_answer = conv.__call__ (raw_answer)
-			except StandardError, err:
-				print "A problem: %s Try again ..." % err
-			except:
-				print "A problem: unknown error. Try again ..."
-			else:
-				return raw_answer
+		return self._ask (question,
+			converters=[],
+			help=help,
+			hints=hints,
+			default=default,
+			strip_flanking_space=strip_flanking_space,
+			multiline=False,
+		)
 	
-	## Questions:
 	def text (self, question, converters=[], help=None, hints=None, default=None,
-			strip_flanking_space=True):
+			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
 		
-		:Parameters:
-			question
-				The text of the question asked.
-			converters
-				An array of conversion and validation functions to be called in
-				sucession with the results of the previous. If any throws an error,
-				it will be caught and the question asked again.
-			help
-				Introductory text to be shown before the question.
-			hints
-				Short reminder text of possible answers.
-			default
-				The value the answer will be set to before processing if a blank
-				answer (i.e. just hitting return) is entered.
-			strip_flanking_space
-				If true, flanking space will be stripped from the answer before it is
-				processed.
-			
-		This is the most general function for getting information from the user. It
-		prints the help text (if any), prints the question and hints and then waits
-		for input form the user. All answers are fed from the converters. If
-		conversion fails, the question is re-asked.
-		
-		The following sequence is used in processing user answers:
-		
-		1. The raw input is read
-		2. If the options is set, flanking space is stripped
-		3. If the input is an empty string and a default answer is given, the input
-			is set to that value (i.e. the default answer must be a valid input value)
-		4. The input is feed through each converter in turn, with the the result of
-			one feeding into the next.
-		5. If the conversion raises an error, the question is asked again
-		6. Otherwise the processed answer is returned
-		
-		We do this because
+		The simplest public question function and the basis of many of the others,
+		this is a thin wrapper around the core `_ask` method that 
 		
 		"""
-		## Preconditions:
-		assert (question), "'ask' requires a question"
-		
-		## Main:
-		# show leadin
-		if help:
-			if isinstance (help, basestring):
-				help = [help]
-			for h in help:
-				print help
-		# build presentation
-		question_str = _clean_text ("%s%s: " % (question, _format_hints_text (hints, default)))
-		# ask question until you get a valid answer
-		while True:
-			print question_str,
-			raw_answer = raw_input()
-			if strip_flanking_space:
-				raw_answer = raw_answer.strip()
-			if default:
-				raw_answer = raw_answer or default
-			try:
-				for conv in converters:
-					raw_answer = conv.__call__ (raw_answer)
-			except StandardError, err:
-				print "A problem: %s Try again ..." % err
-			except:
-				print "A problem: unknown error. Try again ..."
-			else:
-				return raw_answer
+		return self._ask (question,
+			converters=[],
+			help=help,
+			hints=hints,
+			default=default,
+			strip_flanking_space=strip_flanking_space,
+			multiline=True,
+		)
 	
 	
 	def string (question, converters=[], help=None, hints=None, default=None,
@@ -199,7 +90,10 @@ class Session (object):
 		return ask (question, converters=extra_converters+converters, help=help,
 			hints=hints, default=default, strip_flanking_space=True)
 		
-	
+	def integer (question, converters=[], help=None, hints=None, default=None,
+			allow_blank=True, min=None, max=None):
+		
+		HOW DO WE DO INTEGER OR NONE?
 	
 	
 	def short_choice (question, choice_str, converters=[], help=None, default=None):
@@ -291,7 +185,6 @@ class Session (object):
 		)
 	
 	## Internals
-	## Questions:
 	def _ask (self, question, converters=[], help=None, choices=[], hints=None,
 		default=None, multiline=False, strip_flanking_space=True):
 		"""
@@ -325,13 +218,12 @@ class Session (object):
 		1. The raw input is read
 		2. If the options is set, flanking space is stripped
 		3. If the input is an empty string and a default answer is given, the input
-			is set to that value (i.e. the default answer must be a valid input value)
-		4. The input is feed through each converter in turn, with the the result of
-			one feeding into the next.
+			is set to that value (i.e. the default answer must be a valid input
+			value)
+		4. The input is feed through each converter in turn, with the the result
+			of one feeding into the next.
 		5. If the conversion raises an error, the question is asked again
 		6. Otherwise the processed answer is returned
-		
-		We do this because
 		
 		"""
 		## Preconditions:
@@ -340,17 +232,18 @@ class Session (object):
 		## Main:
 		# show leadin
 		if help:
-			if isinstance (help, basestring):
-				help = [help]
-			for h in help:
-				print help
+			print self._clean_text (help)
 		for c in choices:
-			print c.lstrip()
-		# build presentation
-		question_str = _clean_text ("%s%s: " % (question, _format_hints_text (hints, default)))
+			print "   %s" % c.lstrip()
+		
+		# build actual question line
+		question_str = self._clean_text ("%s%s: " % (
+			question, _format_hints_text (hints, default)))
+		
 		# ask question until you get a valid answer
 		while True:
 			print question_str,
+			# TODO: patch for readline and multiline
 			raw_answer = raw_input()
 			if strip_flanking_space:
 				raw_answer = raw_answer.strip()
@@ -360,7 +253,7 @@ class Session (object):
 				for conv in converters:
 					raw_answer = conv.__call__ (raw_answer)
 			except StandardError, err:
-				print "A problem: %s Try again ..." % err
+				print "A problem: %s. Try again ..." % err
 			except:
 				print "A problem: unknown error. Try again ..."
 			else:
@@ -370,8 +263,8 @@ class Session (object):
 		"""
 		Trim, un-wrap and rewrap text to be presented to the user.
 		"""
-		# XXX: okay so we don't wrap it. Should we? And is there text we don't want
-		# to wrap?
+		# XXX: okay so we don't wrap it. Should we? And is there text we don't
+		# want to wrap?
 		return defs.SPACE_RE.sub (' ', text.strip())
 		
 	
@@ -421,7 +314,6 @@ class Session (object):
 
 
 
-### USER QUESTION FUNCTIONS
 
 
 
