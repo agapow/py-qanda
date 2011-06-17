@@ -1,0 +1,9 @@
+setup.cfg
+setup.py
+qanda/__init__.py
+qanda.egg-info/PKG-INFO
+qanda.egg-info/SOURCES.txt
+qanda.egg-info/dependency_links.txt
+qanda.egg-info/entry_points.txt
+qanda.egg-info/not-zip-safe
+qanda.egg-info/top_level.txt

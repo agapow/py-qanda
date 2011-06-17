@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: qanda
+Version: 0.1dev
+Summary: Simple text prompts and validation for user input
+Home-page: http://www.agapow.net/sofwtare/qanda
+Author: Paul-Michael Agapow
+Author-email: pma@agapow.net
+License: MIT
+Description: Interactive command-line programs need to query users for information, be it text, choices from a list, or simple yes-no answers. qanda is a library of simpel functions to prompt users for such information, with validate and cleanup of answers, allowing default answers, concistent formatting and presentatioon of hepl text and choices. It is not a replacement for textual interfaces like curses and urwid, but intended solely for commandline scripts.
+Keywords: text commandline ui prompt
+Platform: UNKNOWN
