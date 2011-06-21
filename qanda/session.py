@@ -29,6 +29,7 @@ Multiple choice questions are formatted as::
 import types
 
 import defs
+import validators
 
 __all__ = [
 	'Session',
@@ -44,7 +45,8 @@ class Session (object):
 	# XXX: in future, this may include initialization of readline etc.
 	
 	## Questions:
-	def string (self, question, converters=[], help=None, hints=None, default=None,
+	def string (self, question, converters=[], help=None, hints=None,
+			default=None, convert_default=True, 
 			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
@@ -54,7 +56,7 @@ class Session (object):
 		
 		"""
 		return self._ask (question,
-			converters=[],
+			converters=converters,
 			help=help,
 			hints=hints,
 			default=default,
@@ -68,7 +70,8 @@ class Session (object):
 		Ask for and return text from the user.
 		
 		The simplest public question function and the basis of many of the others,
-		this is a thin wrapper around the core `_ask` method that 
+		this is a thin wrapper around the core `_ask` method that allows for
+		multi-line responses.
 		
 		"""
 		return self._ask (question,
@@ -79,24 +82,20 @@ class Session (object):
 			strip_flanking_space=strip_flanking_space,
 			multiline=True,
 		)
-	
-	
-	def string (question, converters=[], help=None, hints=None, default=None,
-			strip_flanking_space=True, allow_blank=True):
-		if allow_blank:
-			extra_converters = []
-		else:
-			extra_converters = [Nonblank()]
-		return ask (question, converters=extra_converters+converters, help=help,
-			hints=hints, default=default, strip_flanking_space=True)
 		
-	def integer (question, converters=[], help=None, hints=None, default=None,
-			allow_blank=True, min=None, max=None):
-		
-		HOW DO WE DO INTEGER OR NONE?
+	def integer (self, question, converters=[], help=None, hints=None,
+			default=None, convert_default=True, min=None, max=None):
+		return self.string (question,
+			converters=[validators.ToInt(), validators.Range (min, max)] + converters,
+			help=help,
+			hints=hints,
+			default=default,
+			convert_default=convert_default,
+			strip_flanking_space=True,
+		)
 	
 	
-	def short_choice (question, choice_str, converters=[], help=None, default=None):
+	def short_choice (self, question, choice_str, converters=[], help=None, default=None):
 		"""
 		Ask the user to make a choice using single letters.
 		"""
@@ -108,13 +107,10 @@ class Session (object):
 			assert (len(default) == 1), \
 			"ask_short_choice uses only single letters, not '%s'" % default
 		## Main:
-		if default:
-			hints = "%s, default %s" % (choice_str, default)
-		else:
-			hints = choice_str
+		hints = choice_str
 		## Postconditions & return:
-		return ask (question,
-			converters= converters or [Vocab(list(choice_str))],
+		return self._ask (question,
+			converters= converters or [validators.Vocab(list(choice_str))],
 			help=help, hints=hints, default=default)
 	
 	
@@ -186,7 +182,8 @@ class Session (object):
 	
 	## Internals
 	def _ask (self, question, converters=[], help=None, choices=[], hints=None,
-		default=None, multiline=False, strip_flanking_space=True):
+		default=None, convert_default=True, multiline=False,
+		strip_flanking_space=True):
 		"""
 		Ask for and return an answer from the user.
 		
@@ -204,6 +201,9 @@ class Session (object):
 			default
 				The value the answer will be set to before processing if a blank
 				answer (i.e. just hitting return) is entered.
+			convert_default
+				If the default value is used, it will be processed through the
+				converters. Otherwise it will be dircetly returned.
 			strip_flanking_space
 				If true, flanking space will be stripped from the answer before it is
 				processed.
@@ -217,15 +217,26 @@ class Session (object):
 		
 		1. The raw input is read
 		2. If the options is set, flanking space is stripped
-		3. If the input is an empty string and a default answer is given, the input
-			is set to that value (i.e. the default answer must be a valid input
-			value)
+		3. If the input is an empty string and a default answer is given:
+			a. if convert_default is set, the input is set to that value (i.e. the
+				default answer must be a valid input value)
+			b. else return default value immediately (bypass conversion)
 		4. The input is feed through each converter in turn, with the the result
 			of one feeding into the next.
 		5. If the conversion raises an error, the question is asked again
 		6. Otherwise the processed answer is returned
 		
 		"""
+		# XXX: the convert_default and default handling is a little tricksy:
+		# - you can't return a default value of None (without some fancy
+		#   converting), because None is intepreted as no default
+		# - It makes sense to process/convert the default value, as this ensures
+		#   that the default value is valid (converts correctly) and the printed
+		#   value can be different to the returned value.
+		# - However this makes some queries difficult, like "ask for an integer
+		#   or return False", where the default value is of a different type. Thus
+		#   the (occasional) need for `convert_default=False`.
+		
 		## Preconditions:
 		assert (question), "'ask' requires a question"
 		
@@ -238,7 +249,7 @@ class Session (object):
 		
 		# build actual question line
 		question_str = self._clean_text ("%s%s: " % (
-			question, _format_hints_text (hints, default)))
+			question, self._format_hints_text (hints, default)))
 		
 		# ask question until you get a valid answer
 		while True:
@@ -247,8 +258,15 @@ class Session (object):
 			raw_answer = raw_input()
 			if strip_flanking_space:
 				raw_answer = raw_answer.strip()
-			if default:
-				raw_answer = raw_answer or default
+			# if the answer is blank and a default has been supplied
+			# NOTE: makes it impossible to have a default value of None
+			if (raw_answer == '') and (default is not None):
+				if convert_default:
+					# feed default through converters
+					raw_answer = default
+				else:
+					# return default value immmediately
+					return default
 			try:
 				for conv in converters:
 					raw_answer = conv.__call__ (raw_answer)
@@ -288,7 +306,7 @@ class Session (object):
 		
 		For example::
 		
-			>>> print _format_hints_text()
+			>>> print prompt._format_hints_text()
 			
 			>>> print _format_hints_text([1, 2, 3], 'foo')
 			 (1,2,3) [foo]

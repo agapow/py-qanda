@@ -1,29 +1,20 @@
 """
 Prompting the users for, and validating, answers.
 
-These provide a simple, consistent and robust way of formatting prompts for
-gathering information from a commandline user and validating their answers.
-Users are prompted with a question and optionally explanatory help text and
-hints of possible answers.
-
-A question is usually formatted as follows::
-
-	helptext ... (multiple lines if need be) ... helptext
-	question (hints) [default]:
-
-Multiple choice questions are formatted as::
-
-	helptext ... (multiple lines if need be) ... helptext
-	1. choice
-	2. choice
-	...
-	N. choice
-	question (hints) [default]:
+In *qanda*, answers from a user may be processed through a list of validators.
+This follows the idiom of Ian Bicking & FormEncode where validation and
+conversion are one and the same: raw values are passed into a converter and the
+results are passed into the next. Should an exception be raised, conversion is
+halted and 
 
 """
+# TODO: "or" validator
 
 
 ### IMPORTS
+
+import re
+import exceptions
 
 import defs
 
@@ -33,18 +24,6 @@ __all__ = [
 
 
 ### CONSTANTS & DEFINES
-
-SPACE_RE = re.compile ('\s+')
-
-YESNO_SYNONYMS = {
-	'yes': 'y',
-	'no': 'n',
-	'true': 'y',
-	'false': 'n',
-	'on': 'y',
-	'off': 'n',
-}
-
 
 ### IMPLEMENTATION ###
 
@@ -68,9 +47,9 @@ class BaseValidator (object):
 	def convert (self, value):
 		# NOTE: override in subclass
 		return value
-		
-		
-class Clean (Converter):
+
+
+class Clean (BaseValidator):
 	"""
 	Normalize values by stripping flanking space and converting to lower case.
 	
@@ -78,9 +57,9 @@ class Clean (Converter):
 	"""
 	def __call__ (self, value):
 		return value.strip().lower()
-		
-		
-class Synonyms (Converter):
+
+
+class Synonyms (BaseValidator):
 	"""
 	Map values to other values.
 	
@@ -92,9 +71,9 @@ class Synonyms (Converter):
 		
 	def __call__ (self, value):
 		return self._syns.get (value, value)
-		
-		
-class Vocab (Converter):
+
+
+class Vocab (BaseValidator):
 	"""
 	Ensure values fall within a fixed set.
 	"""
@@ -102,17 +81,32 @@ class Vocab (Converter):
 		self._allowed_values = args
 		
 	def __call__ (self, value):
-		assert value in self._allowed_values, "I don't understand '%s'." % value
+		assert value in self._allowed_values, "I don't understand '%s'" % value
 		return value
 
 
-class Nonblank (Converter):
+class Nonblank (BaseValidator):
+	"""
+	Only allow values non-blank strings (i.e. those with a length more than 0).
+	"""
 	def validate (self, value):
 		assert 0 < len(value), "can't be a blank string"
 		return value
-	
 
-class Range (Converter):
+
+class Regex (BaseValidator):
+	"""
+	Only allow values that match a certain pattern.
+	"""
+	def __init__ (self, patt):
+		self.re = re.compile (patt)
+	
+	def __call__ (self, value):
+		assert self.re.match (value)
+		return value
+
+
+class Range (BaseValidator):
 	"""
 	Only allow values between certain inclusive bounds.
 	"""
@@ -125,7 +119,26 @@ class Range (Converter):
 			assert self.min <= value, "'%s' is lower than '%s'" % (value, self.min)
 		if self.max is not None:
 			assert value <= self.max, "'%s' is higher than '%s'" % (value, self.max)
-		
-		
+		return value
+
+
+class ToInt (BaseValidator):
+	def validate (self, value):
+		try:
+			conv_val = int (value)
+			return conv_val
+		except:
+			raise exceptions.ValueError ("not an integer")
+
+
+class ToFloat (BaseValidator):
+	def validate (self, value):
+		try:
+			conv_val = float (value)
+			return conv_val
+		except:
+			raise exceptions.ValueError ("not a float")
+
+
 
 ### END #######################################################################
