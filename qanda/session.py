@@ -23,6 +23,8 @@ Multiple choice questions are formatted as::
 """
 # TODO: add readline support for better editting?
 
+__docformat__ = "restructuredtext en"
+
 
 ### IMPORTS
 
@@ -215,16 +217,19 @@ class Session (object):
 		
 		The following sequence is used in processing user answers:
 		
-		1. The raw input is read
-		2. If the options is set, flanking space is stripped
-		3. If the input is an empty string and a default answer is given:
-			a. if convert_default is set, the input is set to that value (i.e. the
-				default answer must be a valid input value)
-			b. else return default value immediately (bypass conversion)
-		4. The input is feed through each converter in turn, with the the result
-			of one feeding into the next.
-		5. If the conversion raises an error, the question is asked again
-		6. Otherwise the processed answer is returned
+			1. The raw input is read
+			2. If the options is set, flanking space is stripped
+			3. If the input is an empty string and a default answer is given:
+			
+				1. if convert_default is set, the input is set to that value (i.e.
+				the default answer must be a valid input value)
+				
+				2. else return default value immediately (bypass conversion)
+				
+			4. The input is feed through each converter in turn, with the the result
+				of one feeding into the next.
+			5. If the conversion raises an error, the question is asked again
+			6. Otherwise the processed answer is returned
 		
 		"""
 		# XXX: the convert_default and default handling is a little tricksy:
