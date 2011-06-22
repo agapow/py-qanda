@@ -7,9 +7,15 @@ setup (
 	name=qanda.__name__,
 	version=qanda.__version__,
 	description="Simple text prompts and validation for user input",
-	long_description="""\
-	Interactive command-line programs need to query users for information, be it text, choices from a list, or simple yes-no answers. qanda is a library of simpel functions to prompt users for such information, with validate and cleanup of answers, allowing default answers, concistent formatting and presentatioon of hepl text and choices. It is not a replacement for textual interfaces like curses and urwid, but intended solely for commandline scripts.""",
-	classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+	long_description=open("README.txt").read() + "\n" +
+		open(os.path.join("docs", "HISTORY.txt")).read(),
+	classifiers=[
+		'Environment :: Console',
+		'Intended Audience :: Developers',
+		'License :: OSI Approved :: MIT License',
+		'Programming Language :: Python',
+		'Topic :: Software Development :: User Interfaces',
+	],
 	keywords='text commandline ui prompt',
 	author=qanda.__author__,
 	author_email=qanda.__email__,
@@ -22,6 +28,6 @@ setup (
 		 # -*- Extra requirements: -*-
 	],
 	entry_points="""
-	# -*- Entry points: -*-
+		# -*- Entry points: -*-
 	""",
 )

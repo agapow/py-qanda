@@ -2,10 +2,82 @@ Metadata-Version: 1.0
 Name: qanda
 Version: 0.1dev
 Summary: Simple text prompts and validation for user input
-Home-page: http://www.agapow.net/sofwtare/qanda
+Home-page: http://www.agapow.net/software/py-qanda
 Author: Paul-Michael Agapow
 Author-email: pma@agapow.net
 License: MIT
-Description: Interactive command-line programs need to query users for information, be it text, choices from a list, or simple yes-no answers. qanda is a library of simpel functions to prompt users for such information, with validate and cleanup of answers, allowing default answers, concistent formatting and presentatioon of hepl text and choices. It is not a replacement for textual interfaces like curses and urwid, but intended solely for commandline scripts.
+Description: ===========
+        About qanda
+        ===========
+        
+        Background
+        ----------
+        
+        Interactive command-line programs need to query users for information, be it
+        text, choices from a list, or simple yes-or-no answers. *qanda* is a Python
+        module of simple functions to prompt users for such information, with validation
+        and cleanup of answers, allowing default responses, consistent formatting and
+        presentation of help text, hints and choices. It is not a replacement for
+        textual interfaces like curses and urwid, but intended solely for simple console
+        scripts.
+        
+        
+        Installation
+        ------------
+        
+        The simplest way to install *qanda* is via ``easy_install`` or an equivalent
+        program::
+        
+        % easy_install qanda
+        
+        Alternatively the tarball can be downloaded, unpacked and ``setup.py`` run::
+        
+        % tar zxvf qanda.tgz
+        % cd qanda
+        % python set.py install
+        
+        *qanda* has no requisites and should work with just about any version of Python.
+        
+        
+        Using qanda
+        -----------
+        
+        Examples
+        ~~~~~~~~
+        
+        ::
+        
+        >>> from qanda import prompt
+        >>> prompt.string ("What is your name")
+        What is your name: Foo
+        >>> fname = prompt.string ("Your friends name is",
+        help="I need to know your friends name as well before I talk to you.",
+        hints="first name",
+        default='Bar',
+        )
+        
+        I need to know your friends name as well before I talk to you.
+        Your friends name is (first name) [Bar]:
+        >>> print fname
+        Bar
+        >>> prompt.integer (")
+        
+        
+        Central concepts
+        ~~~~~~~~~~~~~~~~
+        
+        *qanda* packages all question asking methods
+        
+        
+        References
+        ----------
+        
+        
+        
 Keywords: text commandline ui prompt
 Platform: UNKNOWN
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development :: User Interfaces

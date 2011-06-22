@@ -1,0 +1,10 @@
+To do
+=====
+
+* Incoporate readline for better answer editing
+
+* Use colorama for coloring text (wrap calls so it isn't required)
+
+* Get multiline text to actually work
+
+* Auto range hints on Session.integer

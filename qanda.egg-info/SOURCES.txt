@@ -1,6 +1,10 @@
+README.txt
 setup.cfg
 setup.py
 qanda/__init__.py
+qanda/defs.py
+qanda/session.py
+qanda/validators.py
 qanda.egg-info/PKG-INFO
 qanda.egg-info/SOURCES.txt
 qanda.egg-info/dependency_links.txt
