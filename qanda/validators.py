@@ -27,6 +27,7 @@ subclass one of these methods and perhaps supply a c'tor.
 ### IMPORTS
 
 import re
+import shlex
 import exceptions
 
 import defs
@@ -121,7 +122,7 @@ class Nonblank (BaseValidator):
 		assert 0 < len(value), "can't be a blank string"
 
 
-class Regex (BaseValidator):
+class IsPattern (BaseValidator):
 	"""
 	Only allow values that match a certain pattern.
 	"""
@@ -132,7 +133,7 @@ class Regex (BaseValidator):
 		assert self.re.match (value)
 
 
-class Range (BaseValidator):
+class IsInRange (BaseValidator):
 	"""
 	Only allow values between certain inclusive bounds.
 	"""
@@ -165,7 +166,7 @@ class ToFloat (BaseValidator):
 			raise exceptions.ValueError ("not a float")
 
 
-class Length (BaseValidator):
+class IsWithinLength (BaseValidator):
 	"""
 	Only allow values of a certain sizes.
 	
@@ -183,5 +184,37 @@ class Length (BaseValidator):
 			assert len (value) <= self.max, "%s is higher than %s" % (value, self.max)
 
 
+class Split (BaseValidator):
+	"""
+	Split a string into a list, using a supplied delimiter
+	"""
+	def __init__ (self, sep=' '):
+		self.sep = sep
+		
+	def convert (self, value):
+		return value.split (self.sep)
 
-### END #######################################################################
+
+class SplitRegex (BaseValidator):
+	"""
+	Split a string into a list, using a supplied regular expression
+	"""
+	def __init__ (self, patt):
+		# XXX: should acept regex itslef, so options can be set
+		self.regex = re.compile (patt)
+
+	def convert (self, value):
+		return self.regex.split (self.patt, value)
+		
+		
+class SplitShlex (BaseValidator):
+	"""
+	Split a string into a list, using a supplied delimiter
+	"""
+	def convert (self, value):
+		return shlex.split (value)
+				
+				
+						
+
+### END ######################################################################
