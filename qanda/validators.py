@@ -13,7 +13,7 @@ to be callable with a value and to return a (possibly transformed) value,
 optionally throwing an exception if the value is not valid. Thus, type
 constructors can be used as validators::
 
-	>>> prompt.string ("Give me a float", converters=[float])
+	prompt.string ("Give me a float", converters=[float])
 
 More complex validators can be derived from a supplied base class. BaseValidator
 supplies three methods for overriding and customising validator behaviour:

@@ -1,0 +1,7 @@
+History
+-------
+
+v0.1dev (20110624)
+~~~~~~~~~~~~~~~~~~
+
+* Initial release, sure to be buggy and incomplete

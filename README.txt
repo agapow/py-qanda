@@ -85,9 +85,27 @@ The question methods are named after the type of data they elicit::
 Many of the question methods with accept a list of "converters", each of which
 is used to sucessively transform or validate user input. If input fails
 validation, the question is posed again. *qanda* supplies a number of basic
-validators::
+validators:
+
+ToInt, ToFloat
+	Convert inputs to other types
+Regex
+	nly allow values that match a certain pattern
+Range
+	Check that input falls within given bounds	
+Length
+	Check that input length falls within given bounds
+Synonyms
+	Map values to other values
+Vocab
+	Ensure values fall within a fixed set
 
 
 References
 ----------
+
+.. [qanda-home] qanda home page http://www.agapow.net/software/py-qanda
+
+.. [qanda-pypi] qanda on PyPi
+
 

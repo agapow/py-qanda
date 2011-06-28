@@ -46,6 +46,9 @@ __all__ = [
 class Session (object):
 	# XXX: in future, this may include initialization of readline etc.
 	
+	def __init__ (self):
+		self.choice_delim = '/'
+	
 	## Questions:
 	def string (self, question, converters=[], help=None, hints=None,
 			default=None, convert_default=True, 
@@ -116,25 +119,19 @@ class Session (object):
 			help=help, hints=hints, default=default)
 	
 	
-	def yesno (question, help=None, default=None):
+	def yesno (self, question, help=None, default=None):
 		choice_str = 'yn'
-		return short_choice (question, choice_str,
+		return self.short_choice (question, choice_str,
 			converters=[
 				lambda s: s.strip().lower(),
-				Synonyms(YESNO_SYNONYMS),
+				validators.Synonyms(YESNO_SYNONYMS),
 				Vocab(list(choice_str)),
 			],
 			help=help,
 			default=default,
 		)
 	
-	# :Parameters:
-	#    choices
-	#        An array of Choices, or raw strings
-	#
-	# Users can select a value by typing in the value or selecting a number.
-	#
-	def ask_long_choice (question, choices, help=None, default=None):
+	def ask_long_choice (self, question, choices, help=None, default=None):
 		"""
 		Ask the user to make a choice from a list
 		
@@ -172,7 +169,7 @@ class Session (object):
 		help = '\n'.join([help]+ menu).strip()
 	
 		## Postconditions & return:
-		return ask (question,
+		return self._ask (question,
 			converters=[
 				Synonyms(synonyms),
 				Vocab(vocab)
@@ -258,9 +255,10 @@ class Session (object):
 		
 		# ask question until you get a valid answer
 		while True:
-			print question_str,
-			# TODO: patch for readline and multiline
-			raw_answer = raw_input()
+			if multiline:
+				raw_answer = self.read_input_multiline (question_str)
+			else:
+				raw_answer = self.read_input_line (question_str)
 			if strip_flanking_space:
 				raw_answer = raw_answer.strip()
 			# if the answer is blank and a default has been supplied
@@ -312,12 +310,12 @@ class Session (object):
 		For example::
 		
 			>>> print prompt._format_hints_text()
-			
-			>>> print _format_hints_text([1, 2, 3], 'foo')
+			<BLANKLINE>
+			>>> print prompt._format_hints_text([1, 2, 3], 'foo')
 			 (1,2,3) [foo]
-			>>> print _format_hints_text('1-3', '')
+			>>> print prompt._format_hints_text('1-3', '')
 			 (1-3) ['']
-			>>> print _format_hints_text('an integer')
+			>>> print prompt._format_hints_text('an integer')
 			 (an integer)
 			 
 		"""
@@ -325,7 +323,7 @@ class Session (object):
 		if hints is not None:
 			# if hints is an array, join the contents
 			if type(hints) in [types.ListType, types.TupleType]:
-				hints = ','.join (['%s' % x for x in hints])
+				hints = self.choice_delim.join (['%s' % x for x in hints])
 			hints_str = ' (%s)' % hints
 		if default is not None:
 			# quote empty default strings for clarity
@@ -335,25 +333,47 @@ class Session (object):
 		## Postconditions % return:
 		return hints_str
 
+	def read_input_line (self, prompt):
+		"""
+		Read and return a single line of user input.
+		
+		Input is terminated by return or enter (which is stripped).
+		"""
+		# raw_input uses readline if available
+		return raw_input(prompt)
+		
+	def read_input_multiline (self, prompt):
+		"""
+		Read and return multiple lines of user input.
+		
+		Input is terminated by two blank lines. Input is returned as a multiline
+		string, with newlines at the linebreaks.
+		"""
+		# TODO: be nice to make end condition flexible.
+		# NOTE: because raw_input can use readline, the readline up-arrow can
+		# "paste-in" multiple lines of text in one go. So a bit of post-parsing
+		# is required.
+		# NOTE: we don't even attempt to cope with anything but unix yet
+		line_arr = [self.read_input_line (prompt)]
+		if line_arr[0] == '':
+			line_arr = []
+		else:
+			while True:
+				line_arr.append(self.read_input_line ('... '))
+				if line_arr[-2:] == ['', '']:
+					line_arr = line_arr[:-2]
+					break
+		clean_arr = []
+		for line in line_arr:
+			clean_arr.extend (line.split('\n'))
+		return '\n'.join (clean_arr)
 
-
-
-
-
-
-
-
-class Choice (object):
-	def __init__ (self, value, description=None, synonyms=[]):
-		self.value = value
-		self.desc = description
-		self.synonyms = synonyms
 
 # An always available session 
 prompt = Session()
 
 
-		
+
 ## DEBUG & TEST ###
 
 if __name__ == "__main__":

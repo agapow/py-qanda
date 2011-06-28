@@ -60,17 +60,62 @@ Description: ===========
         Your friends name is (first name) [Bar]:
         >>> print fname
         Bar
-        >>> prompt.integer (")
+        >>> years = prompt.integer ("And what is your age", min=1, max=100)
+        And what is your age: 101
+        A problem: 101 is higher than 100. Try again ...
+        And what is your age: 28
+        
         
         
         Central concepts
         ~~~~~~~~~~~~~~~~
         
-        *qanda* packages all question asking methods
+        *qanda* packages all question-asking methods in a Session class. This allows
+        the appearance and functioning of all these methods to be handled consistently
+        and modified centrally. However, you don't necessarily have to create a Session
+        to use it - there's pre-existing Session in the variable called ``prompt``::
+        
+        >>> from qanda import Session
+        >>> s = Session()
+        >>> from qanda import prompt
+        >>> type (prompt)
+        <class 'qanda.session.Session'>
+        
+        The question methods are named after the type of data they elicit::
+        
+        >>> print type(prompt.integer ("Pick a number"))
+        Pick a number: 2
+        <type 'int'>
+        >>> print type(prompt.string ("Pick a name"))
+        Pick a name: Bob
+        <type 'string'>
+        
+        Many of the question methods with accept a list of "converters", each of which
+        is used to sucessively transform or validate user input. If input fails
+        validation, the question is posed again. *qanda* supplies a number of basic
+        validators:
+        
+        ToInt, ToFloat
+        Convert inputs to other types
+        Regex
+        nly allow values that match a certain pattern
+        Range
+        Check that input falls within given bounds
+        Length
+        Check that input length falls within given bounds
+        Synonyms
+        Map values to other values
+        Vocab
+        Ensure values fall within a fixed set
         
         
         References
         ----------
+        
+        .. [qanda-home] qanda home page http://www.agapow.net/software/py-qanda
+        
+        .. [qanda-pypi] qanda on PyPi
+        
         
         
         
