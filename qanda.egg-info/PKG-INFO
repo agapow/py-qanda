@@ -15,11 +15,11 @@ Description: ===========
         
         Interactive command-line programs need to query users for information, be it
         text, choices from a list, or simple yes-or-no answers. *qanda* is a Python
-        module of simple functions to prompt users for such information, with validation
-        and cleanup of answers, allowing default responses, consistent formatting and
+        module of simple functions to prompt users for such information, allowing
+        validation and cleanup of answers, default responses, consistent formatting and
         presentation of help text, hints and choices. It is not a replacement for
         textual interfaces like curses and urwid, but intended solely for simple console
-        scripts.
+        scripts with user input is required.
         
         
         Installation
@@ -118,11 +118,18 @@ Description: ===========
         
         
         
+        History
+        -------
         
+        v0.1dev (20110624)
+        ~~~~~~~~~~~~~~~~~~
+        
+        * Initial release, sure to be buggy and incomplete
 Keywords: text commandline ui prompt
 Platform: UNKNOWN
 Classifier: Environment :: Console
 Classifier: Intended Audience :: Developers
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python
+Classifier: Operating System :: OS Independent
 Classifier: Topic :: Software Development :: User Interfaces

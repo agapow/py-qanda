@@ -14,6 +14,7 @@ setup (
 		'Intended Audience :: Developers',
 		'License :: OSI Approved :: MIT License',
 		'Programming Language :: Python',
+		'Operating System :: OS Independent',
 		'Topic :: Software Development :: User Interfaces',
 	],
 	keywords='text commandline ui prompt',
