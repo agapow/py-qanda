@@ -45,20 +45,21 @@ __all__ = [
 
 class Session (object):
 	# XXX: in future, this may include initialization of readline etc.
-	
+	""
+
 	def __init__ (self):
 		self.choice_delim = '/'
-	
+
 	## Questions:
 	def string (self, question, converters=[], help=None, hints=None,
-			default=None, convert_default=True, 
+			default=None, convert_default=True,
 			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
-		
+
 		The simplest public question function and the basis of many of the others,
-		this is a thin wrapper around the core `_ask` method that 
-		
+		this is a thin wrapper around the core `_ask` method that
+
 		"""
 		return self._ask (question,
 			converters=converters,
@@ -68,16 +69,16 @@ class Session (object):
 			strip_flanking_space=strip_flanking_space,
 			multiline=False,
 		)
-	
+
 	def text (self, question, converters=[], help=None, hints=None, default=None,
 			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
-		
+
 		The simplest public question function and the basis of many of the others,
 		this is a thin wrapper around the core `_ask` method that allows for
 		multi-line responses.
-		
+
 		"""
 		return self._ask (question,
 			converters=[],
@@ -87,7 +88,7 @@ class Session (object):
 			strip_flanking_space=strip_flanking_space,
 			multiline=True,
 		)
-		
+
 	def integer (self, question, converters=[], help=None, hints=None,
 			default=None, convert_default=True, min=None, max=None):
 		return self.string (question,
@@ -98,8 +99,8 @@ class Session (object):
 			convert_default=convert_default,
 			strip_flanking_space=True,
 		)
-	
-	
+
+
 	def short_choice (self, question, choice_str, converters=[], help=None, default=None):
 		"""
 		Ask the user to make a choice using single letters.
@@ -117,8 +118,8 @@ class Session (object):
 		return self._ask (question,
 			converters= converters or [validators.Vocab(list(choice_str))],
 			help=help, hints=hints, default=default)
-	
-	
+
+
 	def yesno (self, question, help=None, default=None):
 		choice_str = 'yn'
 		return self.short_choice (question, choice_str,
@@ -130,13 +131,11 @@ class Session (object):
 			help=help,
 			default=default,
 		)
-	
+
 	def ask_long_choice (self, question, choices, help=None, default=None):
 		"""
-		Ask the user to make a choice from a list
-		
-		:Parameters:
-			
+		Ask the user to make a choice from a list.
+
 		"""
 		## Preconditions:
 		assert choices, "need choices for question"
@@ -167,7 +166,7 @@ class Session (object):
 				synonyms[s] = val
 			menu.append ("   %s. %s" % (menu_index, desc))
 		help = '\n'.join([help]+ menu).strip()
-	
+
 		## Postconditions & return:
 		return self._ask (question,
 			converters=[
@@ -178,14 +177,14 @@ class Session (object):
 			hints='1-%s' % len(choices),
 			default=default
 		)
-	
+
 	## Internals
 	def _ask (self, question, converters=[], help=None, choices=[], hints=None,
 		default=None, convert_default=True, multiline=False,
 		strip_flanking_space=True):
 		"""
 		Ask for and return an answer from the user.
-		
+
 		:Parameters:
 			question
 				The text of the question asked.
@@ -206,28 +205,28 @@ class Session (object):
 			strip_flanking_space
 				If true, flanking space will be stripped from the answer before it is
 				processed.
-			
+
 		This is the underlying function for getting information from the user. It
 		prints the help text (if any), any menu of choices, prints the question
 		and hints and then waits for input from the user. All answers are fed from
 		the converters. If conversion fails, the question is re-asked.
-		
+
 		The following sequence is used in processing user answers:
-		
+
 			1. The raw input is read
 			2. If the options is set, flanking space is stripped
 			3. If the input is an empty string and a default answer is given:
-			
+
 				1. if convert_default is set, the input is set to that value (i.e.
-				the default answer must be a valid input value)
-				
+				   the default answer must be a valid input value)
+
 				2. else return default value immediately (bypass conversion)
-				
+
 			4. The input is feed through each converter in turn, with the the result
 				of one feeding into the next.
 			5. If the conversion raises an error, the question is asked again
 			6. Otherwise the processed answer is returned
-		
+
 		"""
 		# XXX: the convert_default and default handling is a little tricksy:
 		# - you can't return a default value of None (without some fancy
@@ -238,21 +237,21 @@ class Session (object):
 		# - However this makes some queries difficult, like "ask for an integer
 		#   or return False", where the default value is of a different type. Thus
 		#   the (occasional) need for `convert_default=False`.
-		
+
 		## Preconditions:
 		assert (question), "'ask' requires a question"
-		
+
 		## Main:
 		# show leadin
 		if help:
 			print self._clean_text (help)
 		for c in choices:
 			print "   %s" % c.lstrip()
-		
+
 		# build actual question line
 		question_str = self._clean_text ("%s%s: " % (
 			question, self._format_hints_text (hints, default)))
-		
+
 		# ask question until you get a valid answer
 		while True:
 			if multiline:
@@ -279,7 +278,7 @@ class Session (object):
 				print "A problem: unknown error. Try again ..."
 			else:
 				return raw_answer
-	
+
 	def _clean_text (self, text):
 		"""
 		Trim, un-wrap and rewrap text to be presented to the user.
@@ -287,28 +286,28 @@ class Session (object):
 		# XXX: okay so we don't wrap it. Should we? And is there text we don't
 		# want to wrap?
 		return defs.SPACE_RE.sub (' ', text.strip())
-		
-	
+
+
 	def _format_hints_text (self, hints=None, default=None):
 		"""
 		Consistently format hints and default values for inclusion in questions.
-		
+
 		The hints section of the questions is formatted as::
-		
+
 			(hint text) [default value text]
-			
+
 		If hints or the default value are not supplied (i.e. they are set to None)
 		that section does not appear. If neither is supplied, an empty string is
 		returned.
-		
+
 		Some heuristics are used in presentation. If the hints is a list (e.g. of
 		possible choices), these are formatted as a comma delimited list. If the
 		default value is a blank string, '' is given to make this explicit.
-		
+
 		Note this does not check if the default is a valid value.
-		
+
 		For example::
-		
+
 			>>> print prompt._format_hints_text()
 			<BLANKLINE>
 			>>> print prompt._format_hints_text([1, 2, 3], 'foo')
@@ -317,7 +316,7 @@ class Session (object):
 			 (1-3) ['']
 			>>> print prompt._format_hints_text('an integer')
 			 (an integer)
-			 
+
 		"""
 		hints_str = ''
 		if hints is not None:
@@ -336,16 +335,16 @@ class Session (object):
 	def read_input_line (self, prompt):
 		"""
 		Read and return a single line of user input.
-		
+
 		Input is terminated by return or enter (which is stripped).
 		"""
 		# raw_input uses readline if available
 		return raw_input(prompt)
-		
+
 	def read_input_multiline (self, prompt):
 		"""
 		Read and return multiple lines of user input.
-		
+
 		Input is terminated by two blank lines. Input is returned as a multiline
 		string, with newlines at the linebreaks.
 		"""
@@ -369,7 +368,7 @@ class Session (object):
 		return '\n'.join (clean_arr)
 
 
-# An always available session 
+# An always available session
 prompt = Session()
 
 

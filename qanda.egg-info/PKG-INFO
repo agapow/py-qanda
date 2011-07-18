@@ -14,19 +14,23 @@ Description: ===========
         ----------
         
         Interactive command-line programs need to query users for information, be it
-        text, choices from a list, or simple yes-or-no answers. *qanda* is a Python
-        module of simple functions to prompt users for such information, allowing
-        validation and cleanup of answers, default responses, consistent formatting and
-        presentation of help text, hints and choices. It is not a replacement for
-        textual interfaces like curses and urwid, but intended solely for simple console
-        scripts with user input is required.
+        text, choices from a list, or simple yes-or-no answers. *qanda* [qanda-home]_
+        [qanda-pypi]_ module of simple functions to prompt users for such information,
+        allowing validation and cleanup of answers, default responses, consistent
+        formatting and presentation of help text, hints and choices. It is not a
+        replacement for textual interfaces like curses and urwid, but intended solely
+        for simple console scripts with user input is required.
+        
+        **Status:** *qanda* is in use by one other non-trivial library, and so is
+        functional. However this is still an early release and the API may change.
+        Comment is invited.
         
         
         Installation
         ------------
         
-        The simplest way to install *qanda* is via ``easy_install`` or an equivalent
-        program::
+        The simplest way to install *qanda* is via ``easy_install`` [setuptools]_ or an
+        equivalent program::
         
         % easy_install qanda
         
@@ -36,14 +40,18 @@ Description: ===========
         % cd qanda
         % python set.py install
         
-        *qanda* has no requisites and should work with just about any version of Python.
+        *qanda* has no prerequisites and should work with just about any version of
+        Python.
         
         
         Using qanda
         -----------
         
-        Examples
-        ~~~~~~~~
+        A full API is included in the source distribution.
+        
+        
+        An example
+        ~~~~~~~~~~
         
         ::
         
@@ -91,14 +99,15 @@ Description: ===========
         <type 'string'>
         
         Many of the question methods with accept a list of "converters", each of which
-        is used to sucessively transform or validate user input. If input fails
-        validation, the question is posed again. *qanda* supplies a number of basic
-        validators:
+        is used to successively transform or validate user input. This follows the idiom
+        of Ian Bicking's FormEncode: raw values are passed into  a converter and the
+        results are passed into the next. If input fails validation, the question is
+        posed again. *qanda* supplies a number of basic validators:
         
         ToInt, ToFloat
         Convert inputs to other types
         Regex
-        nly allow values that match a certain pattern
+        Only allow values that match a certain pattern
         Range
         Check that input falls within given bounds
         Length
@@ -112,9 +121,11 @@ Description: ===========
         References
         ----------
         
-        .. [qanda-home] qanda home page http://www.agapow.net/software/py-qanda
+        .. [qanda-home] `qanda home page <http://www.agapow.net/software/py-qanda>`__
         
-        .. [qanda-pypi] qanda on PyPi
+        .. [qanda-pypi] `qanda on PyPi <http://pypi.python.org/pypi/qanda>`__
+        
+        .. [setuptools] `Setuptools & easy_install <http://packages.python.org/distribute/easy_install.html>`__
         
         
         

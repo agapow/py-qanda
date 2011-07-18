@@ -1,5 +1,5 @@
-setup.py
-setup.cfg
-README.txt
-qanda
-docs
+include setup.py
+include setup.cfg
+include README.txt
+recursive-include qanda *
+recursive-include docs *
