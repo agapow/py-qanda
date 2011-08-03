@@ -3,10 +3,11 @@ To do
 
 * Incoporate readline for better answer editing
 
-* Use colorama for coloring text (wrap calls so it isn't required)
-
-* Get multiline text to actually work
+* Examine multiline text to make sure it actually works
 
 * Auto range hints on Session.integer
+
+* Better error messages for some validators - perhaps allow error message
+  as a parameter?
 
 

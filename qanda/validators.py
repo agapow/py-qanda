@@ -48,7 +48,7 @@ class BaseValidator (object):
 	A base class for custom validators.
 
 	Ideally, this should make validator subclasses simple to construct.  Derived
-	valuidators will often only have to override one method (of ``__call__``,
+	validators will often only have to override one method (of ``__call__``,
 	``convert`` and ``validate``) and perhaps supply a c'tor.
 	"""
 

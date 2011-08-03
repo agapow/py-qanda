@@ -1,0 +1,22 @@
+Design
+------
+
+
+Validators were initially included in the package. However, the whole issue of
+validation and sanitizing proven to have broader applications and was broken out
+into its own package, leaving qanda to cope with the core problem.
+
+The default value mechanism requires some explanation: initially only ``default``
+was provided, which was subsequently processed. It makes sense to do this as
+process/convert the default value, as this ensures that the default value is
+valid (converts correctly) and the printed value can be different to the
+returned value. However this makes some queries difficult, like "ask for an
+integer or return False" / "if you want queries to be logged, enter a file
+name", where the default value is of a different type. This was initially solved
+with a `` convert_default`` parameter, which was then abandoned for the much
+neater solution of an unprocessed `` default_value``.
+
+Note that you can't return set either default value to ``None``, because it is
+interpreted as the default not being set. However this is no great loss (return
+``False`` instead) and can be solved with some fancy converting).
+

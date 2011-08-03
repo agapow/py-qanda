@@ -32,8 +32,9 @@ Alternatively the tarball can be downloaded, unpacked and ``setup.py`` run::
 	% cd qanda
 	% python set.py install
 
-*qanda* has no prerequisites and should work with just about any version of
-Python.
+*qanda* has one prequisite - the konval library [konval]_ for validators - 
+although it may also use the colorama library [colorama]_ for prettifying text.
+It should work with just about any version of Python.
 
 
 Using qanda
@@ -94,20 +95,29 @@ Many of the question methods with accept a list of "converters", each of which
 is used to successively transform or validate user input. This follows the idiom
 of Ian Bicking's FormEncode: raw values are passed into  a converter and the
 results are passed into the next. If input fails validation, the question is
-posed again. *qanda* supplies a number of basic validators:
+posed again::
+
+	>>> prompt.string ("Choose a password", converters=[ToStripped(),
+	...   CheckLength(min=8)])
+
+These validators are also used internally. For this, *qanda* use the konval
+library [konval-pypi]_:
 
 ToInt, ToFloat
 	Convert inputs to other types
-Regex
+MatchRegex
 	Only allow values that match a certain pattern
-Range
+IsInRange
 	Check that input falls within given bounds
-Length
+CheckLength
 	Check that input length falls within given bounds
-Synonyms
+ToSynonym
 	Map values to other values
-Vocab
+IsInVocab
 	Ensure values fall within a fixed set
+
+*Note: the earliest version of the qanda library had it's own validation
+library, but this was spun off into the konval package.*
 
 
 References
@@ -120,3 +130,8 @@ References
 .. [setuptools] `Setuptools & easy_install <http://packages.python.org/distribute/easy_install.html>`__
 
 .. [qanda-github] `qanda on github <https://github.com/agapow/py-qanda>`__
+
+.. [colorama-pypi] `colorama on PyPi <http://pypi.python.org/pypi/colorama>`__
+
+.. [konval-pypi] `konval on PyPi <http://pypi.python.org/pypi/konval>`__
+

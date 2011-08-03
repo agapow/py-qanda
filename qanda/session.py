@@ -30,8 +30,10 @@ __docformat__ = "restructuredtext en"
 
 import types
 
+import konval
+from konval.impl import make_list
+
 import defs
-import validators
 
 __all__ = [
 	'Session',
@@ -44,11 +46,19 @@ __all__ = [
 ### IMPLEMENTATION ###
 
 class Session (object):
+	"""
+	Encapsulated methods for interacting the a use via a text UI.
+	
+	This "holds" all the different Q-and-A methods, allowing them to be formatted
+	consistently and customized to together. 
+	"""
 	# XXX: in future, this may include initialization of readline etc.
-	""
 
-	def __init__ (self):
+	def __init__ (self, use_styles=True, styles={}):
 		self.choice_delim = '/'
+		self.use_styles = use_styles and defs.COLORAMA_AVAILABLE
+		self.styles = dict (defs.DEFAULT_STYLES)
+		self.styles.update (styles)
 
 	## Questions:
 	def string (self, question, converters=[], help=None, hints=None,
@@ -92,7 +102,7 @@ class Session (object):
 	def integer (self, question, converters=[], help=None, hints=None,
 			default=None, convert_default=True, min=None, max=None):
 		return self.string (question,
-			converters=[validators.ToInt(), validators.Range (min, max)] + converters,
+			converters=[konval.ToInt(), konval.Range (min, max)] + converters,
 			help=help,
 			hints=hints,
 			default=default,
@@ -116,7 +126,7 @@ class Session (object):
 		hints = choice_str
 		## Postconditions & return:
 		return self._ask (question,
-			converters= converters or [validators.Vocab(list(choice_str))],
+			converters= converters or [konval.IsInVocab(list(choice_str))],
 			help=help, hints=hints, default=default)
 
 
@@ -125,17 +135,20 @@ class Session (object):
 		return self.short_choice (question, choice_str,
 			converters=[
 				lambda s: s.strip().lower(),
-				validators.Synonyms(YESNO_SYNONYMS),
-				Vocab(list(choice_str)),
+				konval.ToSynonym(defs.YESNO_SYNONYMS),
+				konval.IsInVocab(list(choice_str)),
 			],
 			help=help,
 			default=default,
 		)
 
-	def ask_long_choice (self, question, choices, help=None, default=None):
+	def long_choice (self, question, choices, help=None, default=None):
 		"""
 		Ask the user to make a choice from a list.
 
+		A choice is a list of strings and/or pairs of strings. If a pair is
+		provided, the first is the visible string, the second the actual returned
+		value. If only a string is provided, it is used for both.
 		"""
 		## Preconditions:
 		assert choices, "need choices for question"
@@ -143,39 +156,24 @@ class Session (object):
 			default = default.lower()
 		## Main:
 		# build choices list
-		synonyms = {}
+		choices = [make_list(x) for x in choices]
+		syns = {}
 		vocab = []
 		menu = []
 		for i, c in enumerate (choices):
-			if isinstance (c, basestring):
-				val = c
-				desc = c
-				syns = []
-			elif instance_of (c, Choice):
-				val = c.value
-				desc = c.desc or value
-				syns = c.syns
-			else:
-				assert false, "shouldn't get here"
-			assert val not in vocab, "duplicate choice value '%s'" % val
-			vocab.append (val)
 			menu_index = str(i + 1)
-			syns.append(menu_index)
-			for s in syns:
-				assert not synonyms.has_key(s), "duplicate choice synonym '%s'" % s
-				synonyms[s] = val
-			menu.append ("   %s. %s" % (menu_index, desc))
-		help = '\n'.join([help]+ menu).strip()
-
+			syns[menu_index] = c[-1]
+			menu.append ("%s. %s" % (menu_index, c[0]))
+		
 		## Postconditions & return:
 		return self._ask (question,
 			converters=[
-				Synonyms(synonyms),
-				Vocab(vocab)
+				konval.ToSynonym (syns),
 			],
 			help=help,
+			choices = menu,
 			hints='1-%s' % len(choices),
-			default=default
+			default=str (default)
 		)
 
 	## Internals
@@ -199,38 +197,47 @@ class Session (object):
 			default
 				The value the answer will be set to before processing if a blank
 				answer (i.e. just hitting return) is entered.
-			convert_default
-				If the default value is used, it will be processed through the
-				converters. Otherwise it will be dircetly returned.
+			default_value
+				The value that will be returned immediately if a blank
+				answer (i.e. just hitting return) is entered.
 			strip_flanking_space
 				If true, flanking space will be stripped from the answer before it is
 				processed.
-
+		
 		This is the underlying function for getting information from the user. It
 		prints the help text (if any), any menu of choices, prints the question
 		and hints and then waits for input from the user. All answers are fed from
 		the converters. If conversion fails, the question is re-asked.
-
+		
 		The following sequence is used in processing user answers:
-
+		
 			1. The raw input is read
+			
 			2. If the options is set, flanking space is stripped
-			3. If the input is an empty string and a default answer is given:
-
-				1. if convert_default is set, the input is set to that value (i.e.
-				   the default answer must be a valid input value)
-
-				2. else return default value immediately (bypass conversion)
-
+			
+			3. If the input is an empty string:
+		
+				1. if default_value is set, that value is returned immediately
+				   (i.e. bypass conversion and validation)
+				
+				2. if default is set, the input is set to that value (i.e.
+				   the default will be processed and thus validate)
+				
 			4. The input is feed through each converter in turn, with the the result
 				of one feeding into the next.
+				
 			5. If the conversion raises an error, the question is asked again
+			
 			6. Otherwise the processed answer is returned
+			
+		Note the two ways of returning a default value. Note that it is also
+		impossible to set the default or default value to None as this is used
+		to test whether they have been set.
 
 		"""
 		# XXX: the convert_default and default handling is a little tricksy:
 		# - you can't return a default value of None (without some fancy
-		#   converting), because None is intepreted as no default
+		#   converting), because None is interpreted as no default
 		# - It makes sense to process/convert the default value, as this ensures
 		#   that the default value is valid (converts correctly) and the printed
 		#   value can be different to the returned value.
@@ -244,14 +251,28 @@ class Session (object):
 		## Main:
 		# show leadin
 		if help:
-			print self._clean_text (help)
+			print "%s%s%s" % (
+				self.set_style ('HELP'),
+				self._clean_text (help), 
+				self.reset_style()
+			)
 		for c in choices:
-			print "   %s" % c.lstrip()
-
+			print "%s   %s%s" % (
+				self.set_style ('CHOICES'), 
+				c.lstrip(),
+				self.reset_style()
+			)
+			
 		# build actual question line
-		question_str = self._clean_text ("%s%s: " % (
-			question, self._format_hints_text (hints, default)))
-
+		question_str = self._clean_text (
+			"%(q_style)s%(q)s%(reset)s%(hint)s%(q_style)s:%(reset)s" % {
+				'q':         question, 
+				'q_style':   self.set_style('QUESTION'),
+				'hint':      self._format_hints_text (hints, default),
+				'reset':     self.reset_style(),
+			}
+		)
+		
 		# ask question until you get a valid answer
 		while True:
 			if multiline:
@@ -262,13 +283,13 @@ class Session (object):
 				raw_answer = raw_answer.strip()
 			# if the answer is blank and a default has been supplied
 			# NOTE: makes it impossible to have a default value of None
-			if (raw_answer == '') and (default is not None):
-				if convert_default:
-					# feed default through converters
+			if (raw_answer == ''):
+				if (default_value is not None):
+					# return default value immediately
+					return default_value
+				if (default is not None):
+					# send default for processing
 					raw_answer = default
-				else:
-					# return default value immmediately
-					return default
 			try:
 				for conv in converters:
 					raw_answer = conv.__call__ (raw_answer)
@@ -330,7 +351,31 @@ class Session (object):
 				default = "''"
 			hints_str += ' [%s]' % default
 		## Postconditions % return:
-		return hints_str
+		return "%s%s%s" % (
+			self.set_style('HINTS'), 
+			hints_str, 
+			self.reset_style()
+		)
+	
+	def set_style (self, style):
+		"""
+		Return the necessary symbols to set styles and color.
+		"""
+		if self.use_styles:
+			return self.styles[style]
+		else:
+			return ''
+		
+	def reset_style (self):
+		"""
+		Return the necessary symbols to set style back to default.
+		"""
+		if self.use_styles:
+			return defs.clr.Style.RESET_ALL
+		else:
+			return ''
+		
+		
 
 	def read_input_line (self, prompt):
 		"""
@@ -339,7 +384,7 @@ class Session (object):
 		Input is terminated by return or enter (which is stripped).
 		"""
 		# raw_input uses readline if available
-		return raw_input(prompt)
+		return raw_input(prompt + ' ')
 
 	def read_input_multiline (self, prompt):
 		"""
@@ -353,7 +398,7 @@ class Session (object):
 		# "paste-in" multiple lines of text in one go. So a bit of post-parsing
 		# is required.
 		# NOTE: we don't even attempt to cope with anything but unix yet
-		line_arr = [self.read_input_line (prompt)]
+		line_arr = [self.read_input_line (prompt + ' ')]
 		if line_arr[0] == '':
 			line_arr = []
 		else:

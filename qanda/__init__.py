@@ -33,7 +33,7 @@ and will capture the returned name or ``Bar`` if nothing is entered.
 
 """
 
-__version__ = "0.1"
+__version__ = "0.2"
 __author__ = "Paul-Michael Agapow"
 __email__ = "pma@agapow.net"
 
