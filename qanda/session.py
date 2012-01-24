@@ -62,7 +62,7 @@ class Session (object):
 
 	## Questions:
 	def string (self, question, converters=[], help=None, hints=None,
-			default=None, convert_default=True,
+			default=None, default_value=None,
 			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
@@ -76,42 +76,47 @@ class Session (object):
 			help=help,
 			hints=hints,
 			default=default,
+			default_value=default_value,
 			strip_flanking_space=strip_flanking_space,
 			multiline=False,
 		)
 
-	def text (self, question, converters=[], help=None, hints=None, default=None,
+	def text (self, question, converters=[],
+			help=None, hints=None,
+			default=None, default_value=None,
 			strip_flanking_space=False):
 		"""
 		Ask for and return text from the user.
-
+		
 		The simplest public question function and the basis of many of the others,
 		this is a thin wrapper around the core `_ask` method that allows for
 		multi-line responses.
-
+		
 		"""
 		return self._ask (question,
 			converters=[],
 			help=help,
 			hints=hints,
 			default=default,
+			default_value=default_value,
 			strip_flanking_space=strip_flanking_space,
 			multiline=True,
 		)
 
 	def integer (self, question, converters=[], help=None, hints=None,
-			default=None, convert_default=True, min=None, max=None):
+			default=None, default_value=None, min=None, max=None):
 		return self.string (question,
 			converters=[konval.ToInt(), konval.Range (min, max)] + converters,
 			help=help,
 			hints=hints,
 			default=default,
-			convert_default=convert_default,
+			default_value=default_value,
 			strip_flanking_space=True,
 		)
 
 
-	def short_choice (self, question, choice_str, converters=[], help=None, default=None):
+	def short_choice (self, question, choice_str, converters=[], help=None,
+			default=None, default_value=None, err_msg=None):
 		"""
 		Ask the user to make a choice using single letters.
 		"""
@@ -124,25 +129,28 @@ class Session (object):
 			"ask_short_choice uses only single letters, not '%s'" % default
 		## Main:
 		hints = choice_str
+		err_msg = err_msg or "choice must be from '%s'" % choice_str
 		## Postconditions & return:
 		return self._ask (question,
-			converters= converters or [konval.IsInVocab(list(choice_str))],
-			help=help, hints=hints, default=default)
-
-
-	def yesno (self, question, help=None, default=None):
-		choice_str = 'yn'
-		return self.short_choice (question, choice_str,
-			converters=[
-				lambda s: s.strip().lower(),
-				konval.ToSynonym(defs.YESNO_SYNONYMS),
-				konval.IsInVocab(list(choice_str)),
-			],
-			help=help,
-			default=default,
+			converters = converters or [konval.IsInVocab(list(choice_str))],
+			help=help, hints=hints,
+			default=default, default_value=default_value,
+			err_msg=err_msg,
 		)
 
-	def long_choice (self, question, choices, help=None, default=None):
+
+	def yesno (self, question, help=None, default=None, default_value=None):
+		choice_str = 'yn'
+		return self.short_choice (question, choice_str,
+			converters=[konval.StrToBool()],
+			help=help,
+			default=default,
+			default_value=default_value,
+			err_msg="choice must be yes or no",
+		)
+
+	def long_choice (self, question, choices, help=None, default=None,
+			default_value=None):
 		"""
 		Ask the user to make a choice from a list.
 
@@ -168,18 +176,26 @@ class Session (object):
 		## Postconditions & return:
 		return self._ask (question,
 			converters=[
+				konval.IsInVocab ([str(x+1) for x in range(len(choices))]),
 				konval.ToSynonym (syns),
 			],
 			help=help,
 			choices = menu,
 			hints='1-%s' % len(choices),
-			default=str (default)
+			default=default,
+			default_value=default_value,
+			err_msg="choice must be from 1-%s" % len(choices),
 		)
 
 	## Internals
-	def _ask (self, question, converters=[], help=None, choices=[], hints=None,
-		default=None, convert_default=True, multiline=False,
-		strip_flanking_space=True):
+	def _ask (self, question, converters=[],
+			choices=[],
+			help=None, hints=None,
+			default=None, default_value=None, 
+			multiline=False,
+			strip_flanking_space=True,
+			err_msg=None,
+		):
 		"""
 		Ask for and return an answer from the user.
 
@@ -188,7 +204,7 @@ class Session (object):
 				The text of the question asked.
 			converters
 				An array of conversion and validation functions to be called in
-				sucession with the results of the previous. If any throws an error,
+				succession with the results of the previous. If any throws an error,
 				it will be caught and the question asked again.
 			help
 				Introductory text to be shown before the question.
@@ -235,16 +251,6 @@ class Session (object):
 		to test whether they have been set.
 
 		"""
-		# XXX: the convert_default and default handling is a little tricksy:
-		# - you can't return a default value of None (without some fancy
-		#   converting), because None is interpreted as no default
-		# - It makes sense to process/convert the default value, as this ensures
-		#   that the default value is valid (converts correctly) and the printed
-		#   value can be different to the returned value.
-		# - However this makes some queries difficult, like "ask for an integer
-		#   or return False", where the default value is of a different type. Thus
-		#   the (occasional) need for `convert_default=False`.
-
 		## Preconditions:
 		assert (question), "'ask' requires a question"
 
@@ -257,7 +263,7 @@ class Session (object):
 				self.reset_style()
 			)
 		for c in choices:
-			print "%s   %s%s" % (
+			print "   %s%s%s" % (
 				self.set_style ('CHOICES'), 
 				c.lstrip(),
 				self.reset_style()
@@ -268,10 +274,12 @@ class Session (object):
 			"%(q_style)s%(q)s%(reset)s%(hint)s%(q_style)s:%(reset)s" % {
 				'q':         question, 
 				'q_style':   self.set_style('QUESTION'),
-				'hint':      self._format_hints_text (hints, default),
+				'hint':      self._format_hints_text (hints, default, default_value),
 				'reset':     self.reset_style(),
 			}
 		)
+		
+		err_msg = err_msg or "%(err)s"
 		
 		# ask question until you get a valid answer
 		while True:
@@ -294,9 +302,15 @@ class Session (object):
 				for conv in converters:
 					raw_answer = conv.__call__ (raw_answer)
 			except StandardError, err:
-				print "A problem: %s. Try again ..." % err
+				message = err_msg % {
+					'err': err,
+					'bad_val': raw_answer,
+				}
+				print "%sA problem: %s. Try again ...%s" % (self.set_style('ERROR'),
+					message, self.reset_style())
 			except:
-				print "A problem: unknown error. Try again ..."
+				print "%sA problem: unknown error. Try again ...%s" % (
+					self.set_style('ERROR'), self.reset_style())
 			else:
 				return raw_answer
 
@@ -309,7 +323,7 @@ class Session (object):
 		return defs.SPACE_RE.sub (' ', text.strip())
 
 
-	def _format_hints_text (self, hints=None, default=None):
+	def _format_hints_text (self, hints=None, default=None, default_value=None):
 		"""
 		Consistently format hints and default values for inclusion in questions.
 
@@ -345,17 +359,22 @@ class Session (object):
 			if type(hints) in [types.ListType, types.TupleType]:
 				hints = self.choice_delim.join (['%s' % x for x in hints])
 			hints_str = ' (%s)' % hints
-		if default is not None:
-			# quote empty default strings for clarity
+		# what default gets printed? the value then the plain
+		if default_value is None:
+			default_print = default
+		else:
+			default_print = default_value
+		# quote empty default strings for clarity
+		if default_print is not None:
 			if default is '':
 				default = "''"
-			hints_str += ' [%s]' % default
+			hints_str += ' %s[%s]%s' % (
+				self.set_style('HINTS'), 
+				default, 
+				self.reset_style()
+			)
 		## Postconditions % return:
-		return "%s%s%s" % (
-			self.set_style('HINTS'), 
-			hints_str, 
-			self.reset_style()
-		)
+		return hints_str
 	
 	def set_style (self, style):
 		"""

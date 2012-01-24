@@ -26,6 +26,8 @@ YESNO_SYNONYMS = {
 	'false': 'n',
 	'on': 'y',
 	'off': 'n',
+	't': 'y',
+	'f': 'n',
 }
 
 try:

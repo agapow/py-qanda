@@ -1,7 +1,6 @@
 Design
 ------
 
-
 Validators were initially included in the package. However, the whole issue of
 validation and sanitizing proven to have broader applications and was broken out
 into its own package, leaving qanda to cope with the core problem.

@@ -1,6 +1,21 @@
 History
 -------
 
+v0.2dev (20110803)
+~~~~~~~~~~~~~~~~~~
+
+* Validation now relies on external package.
+
+* Modified handling of default values to a simpler, more sensible scheme.
+
+* Added text coloring / styling via colorama
+
+* Renamed `` session.ask_long_choice`` to `` session.long_choice`` for
+  consistency.
+  
+* session.yesno now returns boolean
+
+
 v0.1dev (20110624)
 ~~~~~~~~~~~~~~~~~~
 

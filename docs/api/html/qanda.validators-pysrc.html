@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>qanda.validators</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="qanda-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="qanda-module.html">Package&nbsp;qanda</a> ::
+        Module&nbsp;validators
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="qanda.validators-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="qanda.validators-module.html">Module qanda.validators</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-docstring">Prompting the users for, and validating, answers.</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-docstring">In *qanda*, answers from a user may be processed through a list of validators.</tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-docstring">This follows the idiom of Ian Bicking &amp; FormEncode where validation and</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-docstring">conversion are one and the same: raw values are passed into a converter and the</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-docstring">results are passed into the next. Should an exception be raised, conversion is</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"><tt class="py-docstring">halted, an error message printed (based on the exception message) and the</tt> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-docstring">question posed again.</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-docstring">Additional validators are easy to construct. The minimum interface they need is</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"><tt class="py-docstring">to be callable with a value and to return a (possibly transformed) value,</tt> </tt>
+<a name="L13"></a><tt class="py-lineno"> 13</tt>  <tt class="py-line"><tt class="py-docstring">optionally throwing an exception if the value is not valid. Thus, type</tt> </tt>
+<a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line"><tt class="py-docstring">constructors can be used as validators::</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-docstring">        prompt.string ("Give me a float", converters=[float])</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-docstring">More complex validators can be derived from a supplied base class. BaseValidator</tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-docstring">supplies three methods for overriding and customising validator behaviour:</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-docstring">``__call__``, ``convert`` and ``validate``. Custom validators should only need</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-docstring">subclass one of these methods and perhaps supply a c'tor.</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-comment"># TODO: "or" validator</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-name">__docformat__</tt> <tt class="py-op">=</tt> <tt class="py-string">"restructuredtext en"</tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-comment">### IMPORTS</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">re</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">exceptions</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-0" class="py-name" targets="Module qanda.defs=qanda.defs-module.html"><a title="qanda.defs" class="py-name" href="#" onclick="return doclink('link-0', 'defs', 'link-0');">defs</a></tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-name">__all__</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-op">]</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"><tt class="py-comment">### CONSTANTS &amp; DEFINES</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line"><tt class="py-comment">### IMPLEMENTATION ###</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line"> </tt>
+<a name="BaseValidator"></a><div id="BaseValidator-def"><a name="L46"></a><tt class="py-lineno"> 46</tt> <a class="py-toggle" href="#" id="BaseValidator-toggle" onclick="return toggle('BaseValidator');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.BaseValidator-class.html">BaseValidator</a> <tt class="py-op">(</tt><tt class="py-base-class">object</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BaseValidator-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="BaseValidator-expanded"><a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line"><tt class="py-docstring">        A base class for custom validators.</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line"><tt class="py-docstring">        Ideally, this should make validator subclasses simple to construct.  Derived</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line"><tt class="py-docstring">        valuidators will often only have to override one method (of ``__call__``,</tt> </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line"><tt class="py-docstring">        ``convert`` and ``validate``) and perhaps supply a c'tor.</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line"> </tt>
+<a name="BaseValidator.__call__"></a><div id="BaseValidator.__call__-def"><a name="L55"></a><tt class="py-lineno"> 55</tt> <a class="py-toggle" href="#" id="BaseValidator.__call__-toggle" onclick="return toggle('BaseValidator.__call__');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.BaseValidator-class.html#__call__">__call__</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BaseValidator.__call__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseValidator.__call__-expanded"><a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">                <tt class="py-docstring">"""</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line"><tt class="py-docstring">                Converts and validates user input.</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line"><tt class="py-docstring">                :Parameters:</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line"><tt class="py-docstring">                        value</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line"><tt class="py-docstring">                                value to be checked or transformed</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line"><tt class="py-docstring">                :Returns:</tt> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line"><tt class="py-docstring">                        the transformed or validated value</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line"><tt class="py-docstring">                Should throw an error if any problems. Override in subclass if required.</tt> </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line"><tt class="py-docstring">                """</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line">                <tt class="py-comment"># NOTE: override in subclass</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">                <tt class="py-name">value</tt> <tt class="py-op">=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Method qanda.validators.BaseValidator.convert()=qanda.validators.BaseValidator-class.html#convert,Method qanda.validators.Clean.convert()=qanda.validators.Clean-class.html#convert,Method qanda.validators.Synonyms.convert()=qanda.validators.Synonyms-class.html#convert,Method qanda.validators.ToFloat.convert()=qanda.validators.ToFloat-class.html#convert,Method qanda.validators.ToInt.convert()=qanda.validators.ToInt-class.html#convert"><a title="qanda.validators.BaseValidator.convert
+qanda.validators.Clean.convert
+qanda.validators.Synonyms.convert
+qanda.validators.ToFloat.convert
+qanda.validators.ToInt.convert" class="py-name" href="#" onclick="return doclink('link-1', 'convert', 'link-1');">convert</a></tt><tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Method qanda.validators.BaseValidator.validate()=qanda.validators.BaseValidator-class.html#validate,Method qanda.validators.Length.validate()=qanda.validators.Length-class.html#validate,Method qanda.validators.Nonblank.validate()=qanda.validators.Nonblank-class.html#validate,Method qanda.validators.Range.validate()=qanda.validators.Range-class.html#validate,Method qanda.validators.Regex.validate()=qanda.validators.Regex-class.html#validate,Method qanda.validators.Vocab.validate()=qanda.validators.Vocab-class.html#validate"><a title="qanda.validators.BaseValidator.validate
+qanda.validators.Length.validate
+qanda.validators.Nonblank.validate
+qanda.validators.Range.validate
+qanda.validators.Regex.validate
+qanda.validators.Vocab.validate" class="py-name" href="#" onclick="return doclink('link-2', 'validate', 'link-2');">validate</a></tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">value</tt> </tt>
+</div><a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line"> </tt>
+<a name="BaseValidator.validate"></a><div id="BaseValidator.validate-def"><a name="L73"></a><tt class="py-lineno"> 73</tt> <a class="py-toggle" href="#" id="BaseValidator.validate-toggle" onclick="return toggle('BaseValidator.validate');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.BaseValidator-class.html#validate">validate</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BaseValidator.validate-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseValidator.validate-expanded"><a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">                <tt class="py-docstring">"""</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line"><tt class="py-docstring">                Is this value correct or of the correct form?</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line"><tt class="py-docstring">                :Parameters:</tt> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line"><tt class="py-docstring">                        value</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"><tt class="py-docstring">                                value to be checked</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line"><tt class="py-docstring">                Should throw an exception if validations fails.  Override in subclass if</tt> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line"><tt class="py-docstring">                required.</tt> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line"><tt class="py-docstring">                """</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line">                <tt class="py-comment"># NOTE: override in subclass</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">                <tt class="py-comment"># probably a series of assertions</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line">                <tt class="py-keyword">pass</tt> </tt>
+</div><a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line"> </tt>
+<a name="BaseValidator.convert"></a><div id="BaseValidator.convert-def"><a name="L88"></a><tt class="py-lineno"> 88</tt> <a class="py-toggle" href="#" id="BaseValidator.convert-toggle" onclick="return toggle('BaseValidator.convert');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.BaseValidator-class.html#convert">convert</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="BaseValidator.convert-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="BaseValidator.convert-expanded"><a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line">                <tt class="py-docstring">"""</tt> </tt>
+<a name="L90"></a><tt class="py-lineno"> 90</tt>  <tt class="py-line"><tt class="py-docstring">                Transform this value to the desired form.</tt> </tt>
+<a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"><tt class="py-docstring">                :Parameters:</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-docstring">                        value</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"><tt class="py-docstring">                                value to be transformed</tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line"><tt class="py-docstring">                :Returns:</tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"><tt class="py-docstring">                        the transformed value</tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line"><tt class="py-docstring">                Can throw if conversion fails.  Override in subclass if required.</tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line"><tt class="py-docstring">                """</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line">                <tt class="py-comment"># NOTE: override in subclass</tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">value</tt> </tt>
+</div></div><a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"> </tt>
+<a name="Clean"></a><div id="Clean-def"><a name="L105"></a><tt class="py-lineno">105</tt> <a class="py-toggle" href="#" id="Clean-toggle" onclick="return toggle('Clean');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Clean-class.html">Clean</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Clean-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Clean-expanded"><a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line"><tt class="py-docstring">        Normalize values by stripping flanking space and converting to lower case.</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line"><tt class="py-docstring">        Note that this does not explicitly throw errors.</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="Clean.convert"></a><div id="Clean.convert-def"><a name="L111"></a><tt class="py-lineno">111</tt> <a class="py-toggle" href="#" id="Clean.convert-toggle" onclick="return toggle('Clean.convert');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Clean-class.html#convert">convert</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Clean.convert-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Clean.convert-expanded"><a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">value</tt><tt class="py-op">.</tt><tt class="py-name">strip</tt><tt class="py-op">(</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">lower</tt><tt class="py-op">(</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line"> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line"> </tt>
+<a name="Synonyms"></a><div id="Synonyms-def"><a name="L115"></a><tt class="py-lineno">115</tt> <a class="py-toggle" href="#" id="Synonyms-toggle" onclick="return toggle('Synonyms');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Synonyms-class.html">Synonyms</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Synonyms-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Synonyms-expanded"><a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line"><tt class="py-docstring">        Map values to other values.</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line"><tt class="py-docstring">        Note that this does not explicitly throw errors. If a value is un-mapped,</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line"><tt class="py-docstring">        it is simply returned.</tt> </tt>
+<a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="Synonyms.__init__"></a><div id="Synonyms.__init__-def"><a name="L122"></a><tt class="py-lineno">122</tt> <a class="py-toggle" href="#" id="Synonyms.__init__-toggle" onclick="return toggle('Synonyms.__init__');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Synonyms-class.html#__init__">__init__</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">d</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Synonyms.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Synonyms.__init__-expanded"><a name="L123"></a><tt class="py-lineno">123</tt>  <tt class="py-line">                <tt class="py-docstring">"""</tt> </tt>
+<a name="L124"></a><tt class="py-lineno">124</tt>  <tt class="py-line"><tt class="py-docstring">                :Parameters:</tt> </tt>
+<a name="L125"></a><tt class="py-lineno">125</tt>  <tt class="py-line"><tt class="py-docstring">                        d</tt> </tt>
+<a name="L126"></a><tt class="py-lineno">126</tt>  <tt class="py-line"><tt class="py-docstring">                                a dictionary mapping input values to output values</tt> </tt>
+<a name="L127"></a><tt class="py-lineno">127</tt>  <tt class="py-line"><tt class="py-docstring">                """</tt> </tt>
+<a name="L128"></a><tt class="py-lineno">128</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_syns</tt> <tt class="py-op">=</tt> <tt class="py-name">d</tt> </tt>
+</div><a name="L129"></a><tt class="py-lineno">129</tt>  <tt class="py-line"> </tt>
+<a name="Synonyms.convert"></a><div id="Synonyms.convert-def"><a name="L130"></a><tt class="py-lineno">130</tt> <a class="py-toggle" href="#" id="Synonyms.convert-toggle" onclick="return toggle('Synonyms.convert');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Synonyms-class.html#convert">convert</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Synonyms.convert-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Synonyms.convert-expanded"><a name="L131"></a><tt class="py-lineno">131</tt>  <tt class="py-line">                <tt class="py-keyword">return</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_syns</tt><tt class="py-op">.</tt><tt class="py-name">get</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">,</tt> <tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L132"></a><tt class="py-lineno">132</tt>  <tt class="py-line"> </tt>
+<a name="L133"></a><tt class="py-lineno">133</tt>  <tt class="py-line"> </tt>
+<a name="Vocab"></a><div id="Vocab-def"><a name="L134"></a><tt class="py-lineno">134</tt> <a class="py-toggle" href="#" id="Vocab-toggle" onclick="return toggle('Vocab');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Vocab-class.html">Vocab</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Vocab-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Vocab-expanded"><a name="L135"></a><tt class="py-lineno">135</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L136"></a><tt class="py-lineno">136</tt>  <tt class="py-line"><tt class="py-docstring">        Ensure values fall within a fixed set.</tt> </tt>
+<a name="L137"></a><tt class="py-lineno">137</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="Vocab.__init__"></a><div id="Vocab.__init__-def"><a name="L138"></a><tt class="py-lineno">138</tt> <a class="py-toggle" href="#" id="Vocab.__init__-toggle" onclick="return toggle('Vocab.__init__');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Vocab-class.html#__init__">__init__</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">args</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Vocab.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Vocab.__init__-expanded"><a name="L139"></a><tt class="py-lineno">139</tt>  <tt class="py-line">                <tt class="py-docstring">"""</tt> </tt>
+<a name="L140"></a><tt class="py-lineno">140</tt>  <tt class="py-line"><tt class="py-docstring">                :Parameters:</tt> </tt>
+<a name="L141"></a><tt class="py-lineno">141</tt>  <tt class="py-line"><tt class="py-docstring">                        args</tt> </tt>
+<a name="L142"></a><tt class="py-lineno">142</tt>  <tt class="py-line"><tt class="py-docstring">                                a sequence of permitted values</tt> </tt>
+<a name="L143"></a><tt class="py-lineno">143</tt>  <tt class="py-line"><tt class="py-docstring">                """</tt> </tt>
+<a name="L144"></a><tt class="py-lineno">144</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_allowed_values</tt> <tt class="py-op">=</tt> <tt class="py-name">args</tt> </tt>
+</div><a name="L145"></a><tt class="py-lineno">145</tt>  <tt class="py-line"> </tt>
+<a name="Vocab.validate"></a><div id="Vocab.validate-def"><a name="L146"></a><tt class="py-lineno">146</tt> <a class="py-toggle" href="#" id="Vocab.validate-toggle" onclick="return toggle('Vocab.validate');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Vocab-class.html#validate">validate</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Vocab.validate-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Vocab.validate-expanded"><a name="L147"></a><tt class="py-lineno">147</tt>  <tt class="py-line">                <tt class="py-keyword">assert</tt> <tt class="py-name">value</tt> <tt class="py-keyword">in</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">_allowed_values</tt><tt class="py-op">,</tt> <tt class="py-string">"I don't understand '%s'"</tt> <tt class="py-op">%</tt> <tt class="py-name">value</tt> </tt>
+</div></div><a name="L148"></a><tt class="py-lineno">148</tt>  <tt class="py-line"> </tt>
+<a name="L149"></a><tt class="py-lineno">149</tt>  <tt class="py-line"> </tt>
+<a name="Nonblank"></a><div id="Nonblank-def"><a name="L150"></a><tt class="py-lineno">150</tt> <a class="py-toggle" href="#" id="Nonblank-toggle" onclick="return toggle('Nonblank');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Nonblank-class.html">Nonblank</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Nonblank-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Nonblank-expanded"><a name="L151"></a><tt class="py-lineno">151</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L152"></a><tt class="py-lineno">152</tt>  <tt class="py-line"><tt class="py-docstring">        Only allow  non-blank strings (i.e. those with a length more than 0).</tt> </tt>
+<a name="L153"></a><tt class="py-lineno">153</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="Nonblank.validate"></a><div id="Nonblank.validate-def"><a name="L154"></a><tt class="py-lineno">154</tt> <a class="py-toggle" href="#" id="Nonblank.validate-toggle" onclick="return toggle('Nonblank.validate');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Nonblank-class.html#validate">validate</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Nonblank.validate-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Nonblank.validate-expanded"><a name="L155"></a><tt class="py-lineno">155</tt>  <tt class="py-line">                <tt class="py-keyword">assert</tt> <tt class="py-number">0</tt> <tt class="py-op">&lt;</tt> <tt class="py-name">len</tt><tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-string">"can't be a blank string"</tt> </tt>
+</div></div><a name="L156"></a><tt class="py-lineno">156</tt>  <tt class="py-line"> </tt>
+<a name="L157"></a><tt class="py-lineno">157</tt>  <tt class="py-line"> </tt>
+<a name="Regex"></a><div id="Regex-def"><a name="L158"></a><tt class="py-lineno">158</tt> <a class="py-toggle" href="#" id="Regex-toggle" onclick="return toggle('Regex');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Regex-class.html">Regex</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Regex-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Regex-expanded"><a name="L159"></a><tt class="py-lineno">159</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L160"></a><tt class="py-lineno">160</tt>  <tt class="py-line"><tt class="py-docstring">        Only allow values that match a certain regular expression.</tt> </tt>
+<a name="L161"></a><tt class="py-lineno">161</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="L162"></a><tt class="py-lineno">162</tt>  <tt class="py-line">        <tt class="py-comment"># TODO: compile flags?</tt> </tt>
+<a name="Regex.__init__"></a><div id="Regex.__init__-def"><a name="L163"></a><tt class="py-lineno">163</tt> <a class="py-toggle" href="#" id="Regex.__init__-toggle" onclick="return toggle('Regex.__init__');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Regex-class.html#__init__">__init__</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">patt</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Regex.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Regex.__init__-expanded"><a name="L164"></a><tt class="py-lineno">164</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">re</tt> <tt class="py-op">=</tt> <tt class="py-name">re</tt><tt class="py-op">.</tt><tt class="py-name">compile</tt> <tt class="py-op">(</tt><tt class="py-name">patt</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L165"></a><tt class="py-lineno">165</tt>  <tt class="py-line"> </tt>
+<a name="Regex.validate"></a><div id="Regex.validate-def"><a name="L166"></a><tt class="py-lineno">166</tt> <a class="py-toggle" href="#" id="Regex.validate-toggle" onclick="return toggle('Regex.validate');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Regex-class.html#validate">validate</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Regex.validate-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Regex.validate-expanded"><a name="L167"></a><tt class="py-lineno">167</tt>  <tt class="py-line">                <tt class="py-keyword">assert</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">re</tt><tt class="py-op">.</tt><tt class="py-name">match</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L168"></a><tt class="py-lineno">168</tt>  <tt class="py-line"> </tt>
+<a name="L169"></a><tt class="py-lineno">169</tt>  <tt class="py-line"> </tt>
+<a name="Range"></a><div id="Range-def"><a name="L170"></a><tt class="py-lineno">170</tt> <a class="py-toggle" href="#" id="Range-toggle" onclick="return toggle('Range');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Range-class.html">Range</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Range-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Range-expanded"><a name="L171"></a><tt class="py-lineno">171</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L172"></a><tt class="py-lineno">172</tt>  <tt class="py-line"><tt class="py-docstring">        Only allow values between certain inclusive bounds.</tt> </tt>
+<a name="L173"></a><tt class="py-lineno">173</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="Range.__init__"></a><div id="Range.__init__-def"><a name="L174"></a><tt class="py-lineno">174</tt> <a class="py-toggle" href="#" id="Range.__init__-toggle" onclick="return toggle('Range.__init__');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Range-class.html#__init__">__init__</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">min</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">max</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Range.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Range.__init__-expanded"><a name="L175"></a><tt class="py-lineno">175</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt> <tt class="py-op">=</tt> <tt class="py-name">min</tt> </tt>
+<a name="L176"></a><tt class="py-lineno">176</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt> <tt class="py-op">=</tt> <tt class="py-name">max</tt> </tt>
+</div><a name="L177"></a><tt class="py-lineno">177</tt>  <tt class="py-line"> </tt>
+<a name="Range.validate"></a><div id="Range.validate-def"><a name="L178"></a><tt class="py-lineno">178</tt> <a class="py-toggle" href="#" id="Range.validate-toggle" onclick="return toggle('Range.validate');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Range-class.html#validate">validate</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Range.validate-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Range.validate-expanded"><a name="L179"></a><tt class="py-lineno">179</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L180"></a><tt class="py-lineno">180</tt>  <tt class="py-line">                        <tt class="py-keyword">assert</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt> <tt class="py-op">&lt;=</tt> <tt class="py-name">value</tt><tt class="py-op">,</tt> <tt class="py-string">"%s is lower than %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt><tt class="py-op">)</tt> </tt>
+<a name="L181"></a><tt class="py-lineno">181</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L182"></a><tt class="py-lineno">182</tt>  <tt class="py-line">                        <tt class="py-keyword">assert</tt> <tt class="py-name">value</tt> <tt class="py-op">&lt;=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt><tt class="py-op">,</tt> <tt class="py-string">"%s is higher than %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L183"></a><tt class="py-lineno">183</tt>  <tt class="py-line"> </tt>
+<a name="L184"></a><tt class="py-lineno">184</tt>  <tt class="py-line"> </tt>
+<a name="ToInt"></a><div id="ToInt-def"><a name="L185"></a><tt class="py-lineno">185</tt> <a class="py-toggle" href="#" id="ToInt-toggle" onclick="return toggle('ToInt');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.ToInt-class.html">ToInt</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ToInt-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ToInt-expanded"><a name="L186"></a><tt class="py-lineno">186</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L187"></a><tt class="py-lineno">187</tt>  <tt class="py-line"><tt class="py-docstring">        Convert a value to an integer.</tt> </tt>
+<a name="L188"></a><tt class="py-lineno">188</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L189"></a><tt class="py-lineno">189</tt>  <tt class="py-line"><tt class="py-docstring">        While you could just use ``int``, this throws a much nicer error message.</tt> </tt>
+<a name="L190"></a><tt class="py-lineno">190</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="ToInt.convert"></a><div id="ToInt.convert-def"><a name="L191"></a><tt class="py-lineno">191</tt> <a class="py-toggle" href="#" id="ToInt.convert-toggle" onclick="return toggle('ToInt.convert');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.ToInt-class.html#convert">convert</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ToInt.convert-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ToInt.convert-expanded"><a name="L192"></a><tt class="py-lineno">192</tt>  <tt class="py-line">                <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L193"></a><tt class="py-lineno">193</tt>  <tt class="py-line">                        <tt class="py-name">conv_val</tt> <tt class="py-op">=</tt> <tt class="py-name">int</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+<a name="L194"></a><tt class="py-lineno">194</tt>  <tt class="py-line">                        <tt class="py-keyword">return</tt> <tt class="py-name">conv_val</tt> </tt>
+<a name="L195"></a><tt class="py-lineno">195</tt>  <tt class="py-line">                <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L196"></a><tt class="py-lineno">196</tt>  <tt class="py-line">                        <tt class="py-keyword">raise</tt> <tt class="py-name">exceptions</tt><tt class="py-op">.</tt><tt class="py-name">ValueError</tt> <tt class="py-op">(</tt><tt class="py-string">"not an integer"</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L197"></a><tt class="py-lineno">197</tt>  <tt class="py-line"> </tt>
+<a name="L198"></a><tt class="py-lineno">198</tt>  <tt class="py-line"> </tt>
+<a name="ToFloat"></a><div id="ToFloat-def"><a name="L199"></a><tt class="py-lineno">199</tt> <a class="py-toggle" href="#" id="ToFloat-toggle" onclick="return toggle('ToFloat');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.ToFloat-class.html">ToFloat</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ToFloat-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ToFloat-expanded"><a name="L200"></a><tt class="py-lineno">200</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L201"></a><tt class="py-lineno">201</tt>  <tt class="py-line"><tt class="py-docstring">        Convert a value to a float.</tt> </tt>
+<a name="L202"></a><tt class="py-lineno">202</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L203"></a><tt class="py-lineno">203</tt>  <tt class="py-line"><tt class="py-docstring">        While you could just use ``float``, this throws a much nicer error message.</tt> </tt>
+<a name="L204"></a><tt class="py-lineno">204</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="ToFloat.convert"></a><div id="ToFloat.convert-def"><a name="L205"></a><tt class="py-lineno">205</tt> <a class="py-toggle" href="#" id="ToFloat.convert-toggle" onclick="return toggle('ToFloat.convert');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.ToFloat-class.html#convert">convert</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ToFloat.convert-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="ToFloat.convert-expanded"><a name="L206"></a><tt class="py-lineno">206</tt>  <tt class="py-line">                <tt class="py-keyword">try</tt><tt class="py-op">:</tt> </tt>
+<a name="L207"></a><tt class="py-lineno">207</tt>  <tt class="py-line">                        <tt class="py-name">conv_val</tt> <tt class="py-op">=</tt> <tt class="py-name">float</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> </tt>
+<a name="L208"></a><tt class="py-lineno">208</tt>  <tt class="py-line">                        <tt class="py-keyword">return</tt> <tt class="py-name">conv_val</tt> </tt>
+<a name="L209"></a><tt class="py-lineno">209</tt>  <tt class="py-line">                <tt class="py-keyword">except</tt><tt class="py-op">:</tt> </tt>
+<a name="L210"></a><tt class="py-lineno">210</tt>  <tt class="py-line">                        <tt class="py-keyword">raise</tt> <tt class="py-name">exceptions</tt><tt class="py-op">.</tt><tt class="py-name">ValueError</tt> <tt class="py-op">(</tt><tt class="py-string">"not a float"</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L211"></a><tt class="py-lineno">211</tt>  <tt class="py-line"> </tt>
+<a name="L212"></a><tt class="py-lineno">212</tt>  <tt class="py-line"> </tt>
+<a name="Length"></a><div id="Length-def"><a name="L213"></a><tt class="py-lineno">213</tt> <a class="py-toggle" href="#" id="Length-toggle" onclick="return toggle('Length');">-</a><tt class="py-line"><tt class="py-keyword">class</tt> <a class="py-def-name" href="qanda.validators.Length-class.html">Length</a> <tt class="py-op">(</tt><tt class="py-base-class">BaseValidator</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Length-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="Length-expanded"><a name="L214"></a><tt class="py-lineno">214</tt>  <tt class="py-line">        <tt class="py-docstring">"""</tt> </tt>
+<a name="L215"></a><tt class="py-lineno">215</tt>  <tt class="py-line"><tt class="py-docstring">        Only allow values of a certain sizes.</tt> </tt>
+<a name="L216"></a><tt class="py-lineno">216</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L217"></a><tt class="py-lineno">217</tt>  <tt class="py-line"><tt class="py-docstring">        Length limitations are expressed as (inclusive) minimum and maximum sizes.</tt> </tt>
+<a name="L218"></a><tt class="py-lineno">218</tt>  <tt class="py-line"><tt class="py-docstring">        This is most useful for strings, but could be used for lists.</tt> </tt>
+<a name="L219"></a><tt class="py-lineno">219</tt>  <tt class="py-line"><tt class="py-docstring">        """</tt> </tt>
+<a name="Length.__init__"></a><div id="Length.__init__-def"><a name="L220"></a><tt class="py-lineno">220</tt> <a class="py-toggle" href="#" id="Length.__init__-toggle" onclick="return toggle('Length.__init__');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Length-class.html#__init__">__init__</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">min</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">max</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Length.__init__-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Length.__init__-expanded"><a name="L221"></a><tt class="py-lineno">221</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt> <tt class="py-op">=</tt> <tt class="py-name">min</tt> </tt>
+<a name="L222"></a><tt class="py-lineno">222</tt>  <tt class="py-line">                <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt> <tt class="py-op">=</tt> <tt class="py-name">max</tt> </tt>
+</div><a name="L223"></a><tt class="py-lineno">223</tt>  <tt class="py-line"> </tt>
+<a name="Length.validate"></a><div id="Length.validate-def"><a name="L224"></a><tt class="py-lineno">224</tt> <a class="py-toggle" href="#" id="Length.validate-toggle" onclick="return toggle('Length.validate');">-</a><tt class="py-line">        <tt class="py-keyword">def</tt> <a class="py-def-name" href="qanda.validators.Length-class.html#validate">validate</a> <tt class="py-op">(</tt><tt class="py-param">self</tt><tt class="py-op">,</tt> <tt class="py-param">value</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="Length.validate-collapsed" style="display:none;" pad="+++" indent="++++++++++++"></div><div id="Length.validate-expanded"><a name="L225"></a><tt class="py-lineno">225</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L226"></a><tt class="py-lineno">226</tt>  <tt class="py-line">                        <tt class="py-keyword">assert</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt> <tt class="py-op">&lt;=</tt> <tt class="py-name">len</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-string">"%s is lower than %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">min</tt><tt class="py-op">)</tt> </tt>
+<a name="L227"></a><tt class="py-lineno">227</tt>  <tt class="py-line">                <tt class="py-keyword">if</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt> <tt class="py-keyword">is</tt> <tt class="py-keyword">not</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L228"></a><tt class="py-lineno">228</tt>  <tt class="py-line">                        <tt class="py-keyword">assert</tt> <tt class="py-name">len</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">)</tt> <tt class="py-op">&lt;=</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt><tt class="py-op">,</tt> <tt class="py-string">"%s is higher than %s"</tt> <tt class="py-op">%</tt> <tt class="py-op">(</tt><tt class="py-name">value</tt><tt class="py-op">,</tt> <tt class="py-name">self</tt><tt class="py-op">.</tt><tt class="py-name">max</tt><tt class="py-op">)</tt> </tt>
+</div></div><a name="L229"></a><tt class="py-lineno">229</tt>  <tt class="py-line"> </tt>
+<a name="L230"></a><tt class="py-lineno">230</tt>  <tt class="py-line"> </tt>
+<a name="L231"></a><tt class="py-lineno">231</tt>  <tt class="py-line"> </tt>
+<a name="L232"></a><tt class="py-lineno">232</tt>  <tt class="py-line"><tt class="py-comment">### END #######################################################################</tt> </tt>
+<a name="L233"></a><tt class="py-lineno">233</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+  <!-- Home link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="qanda-module.html">Home</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Mon Jul 18 15:05:20 2011
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

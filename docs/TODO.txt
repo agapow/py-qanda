@@ -1,13 +1,17 @@
 To do
 =====
 
-* Incoporate readline for better answer editing
+* Incorporate readline for better answer editing
 
-* Examine multiline text to make sure it actually works
+* Examine multi-line text to make sure it actually works
 
 * Auto range hints on Session.integer
 
 * Better error messages for some validators - perhaps allow error message
   as a parameter?
+  
+* Some of questions have a very fat interface (a lot of options). While they're
+  all optional, it's unclear that we're getting value of of these. Maybe more
+  specialised simpler questions would do.
 
 
